@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
@@ -11,15 +13,21 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.13.0",
-    "bcryptjs": "^3.0.2",
+    "@types/cookie-parser": "^1.4.9",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "http-status": "^2.1.0",
     "jsonwebtoken": "^9.0.2",
-    "prisma": "^6.13.0"
+    "prisma": "^6.13.0",
+    "zod": "^4.0.14"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.1.0",
