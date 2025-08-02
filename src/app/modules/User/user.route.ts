@@ -9,30 +9,30 @@ const router = express.Router();
 
 router.get("/profile", auth(), userControllers.getUserProfile);
 
-router.get("/all-users", auth(UserRole.ADMIN), userControllers.getAllUser);
+router.get("/all-users", auth(UserRole.SUPERADMIN), userControllers.getAllUser);
 
 router.get(
   "/user",
-  auth(UserRole.ADMIN, UserRole.USER),
+  auth(UserRole.INSTRUCTOR, UserRole.STUDENT),
   userControllers.getUser
 );
 
 router.get(
   "/user-profile",
-  auth(UserRole.ADMIN, UserRole.USER),
+  auth(UserRole.INSTRUCTOR, UserRole.STUDENT),
   userControllers.getUserWithProfile
 );
 
 router.put(
   "/profile",
-  auth(UserRole.ADMIN, UserRole.USER),
+  auth(UserRole.INSTRUCTOR, UserRole.STUDENT),
   validateRequest(userValidationSchema.updateUserSchema),
   userControllers.updateUser
 );
 
 router.put(
   "/status/:userId",
-  auth(UserRole.ADMIN),
+  auth(UserRole.SUPERADMIN),
   validateRequest(userValidationSchema.updateUserSchema),
   userControllers.updateUserStatus
 );

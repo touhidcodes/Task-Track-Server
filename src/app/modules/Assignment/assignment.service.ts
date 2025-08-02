@@ -36,6 +36,11 @@ const getAllAssignments = async (options: TAssignmentQueryFilter) => {
 
   const andConditions: Prisma.AssignmentWhereInput[] = [];
 
+  // Exclude expired assignments
+  andConditions.push({
+    deadline: { gte: new Date() },
+  });
+
   // Optional search term
   if (filters?.searchTerm) {
     andConditions.push({

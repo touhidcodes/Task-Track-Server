@@ -1,6 +1,8 @@
 import express from "express";
-import { userRoutes } from "../modules/User/user.routes";
-import { authRoutes } from "../modules/Auth/auth.routes";
+import { userRoutes } from "../modules/User/user.route";
+import { authRoutes } from "../modules/Auth/auth.route";
+import { submissionRoutes } from "../modules/Submission/submission.route";
+import { assignmentRoutes } from "../modules/Assignment/assignment.route";
 
 const router = express.Router();
 
@@ -12,6 +14,14 @@ const moduleRoutes = [
   {
     path: "/",
     route: userRoutes,
+  },
+  {
+    path: "/assignment",
+    route: assignmentRoutes,
+  },
+  {
+    path: "/submission",
+    route: submissionRoutes,
   },
 ];
 
