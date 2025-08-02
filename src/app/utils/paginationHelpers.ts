@@ -1,25 +1,17 @@
-type IOptions = {
-  page?: number;
-  limit?: number;
-  sortOrder?: string;
-  sortBy?: string;
-};
+import {
+  TPaginationOptions,
+  TPaginationResult,
+} from "../interfaces/pagination";
 
-type IOptionsResult = {
-  page: number;
-  limit: number;
-  skip: number;
-  sortBy: string;
-  sortOrder: string;
-};
-
-const calculatePagination = (options: IOptions): IOptionsResult => {
+const calculatePagination = (
+  options: TPaginationOptions
+): TPaginationResult => {
   const page: number = Number(options.page) || 1;
   const limit: number = Number(options.limit) || 10;
   const skip: number = (Number(page) - 1) * limit;
 
-  const sortBy: string = options.sortBy || "createdAt";
-  const sortOrder: string = options.sortOrder || "desc";
+  const sortBy: string | undefined = options.sortBy;
+  const sortOrder: string | undefined = options.sortOrder;
 
   return {
     page,

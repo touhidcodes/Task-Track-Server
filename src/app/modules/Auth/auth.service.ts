@@ -5,10 +5,6 @@ import * as bcrypt from "bcrypt";
 import config from "../../config/config";
 import APIError from "../../errors/APIError";
 import httpStatus from "http-status";
-import { UserRole, UserStatus } from "@prisma/client";
-import { IChangePassword } from "./auth.interface";
-import { comparePasswords } from "../../utils/comparePassword";
-import { hashedPassword } from "../../utils/hashedPassword";
 import { TUserData } from "../User/user.interface";
 
 const createUser = async (data: TUserData) => {
@@ -29,56 +25,45 @@ const createUser = async (data: TUserData) => {
     password: hashedPassword,
   };
 
-  const result = await prisma.$transaction(async (transactionClient) => {
-    const createdUserData = await transactionClient.user.create({
-      data: userData,
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    const userId = createdUserData.id;
-
-    await transactionClient.userProfile.create({
-      data: {
-        userId: userId,
-      },
-    });
-
-    const accessToken = jwtHelpers.generateToken(
-      {
-        email: userData.email,
-        username: userData.username,
-        userId: userId,
-        role: UserRole.USER,
-      },
-      config.jwt.access_token_secret as Secret,
-      config.jwt.access_token_expires_in as string
-    );
-
-    const refreshToken = jwtHelpers.generateToken(
-      {
-        email: userData.email,
-        username: userData.username,
-        userId: userId,
-        role: UserRole.USER,
-      },
-      config.jwt.refresh_token_secret as Secret,
-      config.jwt.refresh_token_expires_in as string
-    );
-
-    return {
-      accessToken,
-      refreshToken,
-      createdUserData,
-    };
+  const createdUserData = await prisma.user.create({
+    data: userData,
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      role: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   });
 
-  return result;
+  const accessToken = jwtHelpers.generateToken(
+    {
+      email: createdUserData.email,
+      username: createdUserData.username,
+      userId: createdUserData.id,
+      role: createdUserData.role,
+    },
+    config.jwt.access_token_secret as Secret,
+    config.jwt.access_token_expires_in as string
+  );
+
+  const refreshToken = jwtHelpers.generateToken(
+    {
+      email: createdUserData.email,
+      username: createdUserData.username,
+      userId: createdUserData.id,
+      role: createdUserData.role,
+    },
+    config.jwt.refresh_token_secret as Secret,
+    config.jwt.refresh_token_expires_in as string
+  );
+
+  return {
+    accessToken,
+    refreshToken,
+    createdUserData,
+  };
 };
 
 const loginUser = async (payload: { identifier: string; password: string }) => {
@@ -91,7 +76,6 @@ const loginUser = async (payload: { identifier: string; password: string }) => {
   let userData = await prisma.user.findUnique({
     where: {
       email: identifier,
-      status: UserStatus.ACTIVE,
     },
   });
 
@@ -99,7 +83,6 @@ const loginUser = async (payload: { identifier: string; password: string }) => {
     userData = await prisma.user.findUnique({
       where: {
         username: identifier,
-        status: UserStatus.ACTIVE,
       },
     });
   }
@@ -197,43 +180,8 @@ const refreshToken = async (token: string) => {
   };
 };
 
-const changePassword = async (userId: string, payload: IChangePassword) => {
-  const { oldPassword, newPassword } = payload;
-
-  const isUserExist = await prisma.user.findUnique({
-    where: {
-      id: userId,
-      status: UserStatus.ACTIVE,
-    },
-  });
-
-  if (!isUserExist) {
-    throw new APIError(httpStatus.NOT_FOUND, "User does not exist");
-  }
-
-  // checking old password
-  if (
-    isUserExist.password &&
-    !(await comparePasswords(oldPassword, isUserExist.password))
-  ) {
-    throw new APIError(httpStatus.UNAUTHORIZED, "Old Password is incorrect");
-  }
-
-  const hashPassword = await hashedPassword(newPassword);
-
-  await prisma.user.update({
-    where: {
-      id: isUserExist.id,
-    },
-    data: {
-      password: hashPassword,
-    },
-  });
-};
-
 export const authServices = {
   createUser,
   loginUser,
   refreshToken,
-  changePassword,
 };

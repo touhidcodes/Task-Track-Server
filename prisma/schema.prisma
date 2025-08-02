@@ -14,13 +14,14 @@ datasource db {
 }
 
 model User {
-  id          String       @id @default(auto()) @map("_id") @db.ObjectId
-  username    String
-  email       String       @unique
-  password    String
-  role        UserRole
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  username  String   @unique
+  email     String   @unique
+  password  String
+  role      UserRole @default(STUDENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   assignments Assignment[] @relation("InstructorAssignments")
   submissions Submission[]
 
@@ -34,6 +35,8 @@ model Assignment {
   deadline     DateTime
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+  isAvailable  Boolean      @default(true)
+  isDeleted    Boolean      @default(false)
   instructor   User         @relation("InstructorAssignments", fields: [instructorId], references: [id])
   instructorId String       @db.ObjectId
   submissions  Submission[]
@@ -42,18 +45,20 @@ model Assignment {
 }
 
 model Submission {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
   submissionUrl String
   note          String?
-  status        Status     @default(PENDING)
+  status        Status   @default(PENDING)
   feedback      String?
-  student       User       @relation(fields: [studentId], references: [id])
-  studentId     String     @db.ObjectId
-  assignment    Assignment @relation(fields: [assignmentId], references: [id])
-  assignmentId  String     @db.ObjectId
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
+  student      User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId    String     @db.ObjectId
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  assignmentId String     @db.ObjectId
+
+  @@unique([studentId, assignmentId])
   @@map("submissions")
 }
 

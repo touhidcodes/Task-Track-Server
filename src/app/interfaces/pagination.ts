@@ -1,6 +1,14 @@
 export type TPaginationOptions = {
-  page?: number;
-  limit?: number;
-  sortBy?: string | undefined;
-  sortOrder?: string | undefined;
+  page?: string;
+  limit?: string;
+  sortBy?: string;
+  sortOrder?: string;
+};
+
+export type TPaginationResult = {
+  page: number;
+  limit: number;
+  skip: number;
+  sortBy?: string;
+  sortOrder?: string;
 };

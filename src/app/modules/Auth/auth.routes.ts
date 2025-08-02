@@ -17,11 +17,4 @@ router.post(
 
 router.post("/refresh-token", authControllers.refreshToken);
 
-router.post(
-  "/change-password",
-  validateRequest(authValidationSchema.changePasswordSchema),
-  auth(UserRole.ADMIN, UserRole.USER),
-  authControllers.changePassword
-);
-
 export const authRoutes = router;
