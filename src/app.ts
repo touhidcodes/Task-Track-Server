@@ -11,7 +11,7 @@ dotenv.config();
 const app: Application = express();
 
 const corsOptions = {
-  origin: ["http://localhost:3000"],
+  origin: ["https://task-track-app-tau.vercel.app/", "http://localhost:3000"],
   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
   preflightContinue: false,
   optionsSuccessStatus: 204,
