@@ -7,9 +7,6 @@ const createAssignmentSchema = z.object({
     deadline: z.string().refine((val) => !isNaN(Date.parse(val)), {
       message: "Deadline must be a valid date string",
     }),
-    isAvailable: z.boolean().optional(),
-    isDeleted: z.boolean().optional(),
-    instructorId: z.string().nonempty("Instructor ID is required"),
   }),
 });
 

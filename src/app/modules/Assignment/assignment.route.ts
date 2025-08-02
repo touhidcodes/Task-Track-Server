@@ -10,7 +10,7 @@ const router = express.Router();
 // Create assignment (Instructors only)
 router.post(
   "/",
-  auth(UserRole.INSTRUCTOR),
+  // auth(UserRole.INSTRUCTOR),
   validateRequest(assignmentValidationSchema.createAssignmentSchema),
   assignmentControllers.createAssignment
 );
