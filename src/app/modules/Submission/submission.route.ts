@@ -10,8 +10,8 @@ const router = express.Router();
 // Create submission (Student)
 router.post(
   "/",
-  //   auth(UserRole.STUDENT),
-  //   validateRequest(submissionValidationSchema.createSubmissionValidation),
+  auth(UserRole.STUDENT),
+  validateRequest(submissionValidationSchema.createSubmissionValidation),
   submissionControllers.createSubmission
 );
 
