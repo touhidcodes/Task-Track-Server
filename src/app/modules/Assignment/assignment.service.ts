@@ -24,21 +24,42 @@ const createAssignment = async (data: Assignment) => {
       createdAt: true,
     },
   });
+  return result;
+};
+
+// Get all assignments
+const getAllAssignments = async () => {
+  const result = await prisma.assignment.findMany({
+    where: { isDeleted: false, isAvailable: true },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      deadline: true,
+      instructorId: true,
+      isAvailable: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
   return result;
 };
 
-// Get all assignments with pagination/filter
-const getAllAssignments = async (options: TAssignmentQueryFilter) => {
+// Get assignments for logged-in instructor with filters/pagination
+const getInstructorAssignments = async (
+  user: { id: string },
+  options: TAssignmentQueryFilter
+) => {
   const { filters, pagination } = options;
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelper.calculatePagination(pagination);
 
   const andConditions: Prisma.AssignmentWhereInput[] = [];
 
-  // Exclude expired assignments
+  // Always filter by instructorId from req.user
   andConditions.push({
-    deadline: { gte: new Date() },
+    instructorId: user.id,
   });
 
   // Optional search term
@@ -48,13 +69,6 @@ const getAllAssignments = async (options: TAssignmentQueryFilter) => {
         { title: { contains: filters.searchTerm, mode: "insensitive" } },
         { description: { contains: filters.searchTerm, mode: "insensitive" } },
       ],
-    });
-  }
-
-  // Filter by instructor
-  if (filters?.instructorId) {
-    andConditions.push({
-      instructorId: filters.instructorId,
     });
   }
 
@@ -74,6 +88,7 @@ const getAllAssignments = async (options: TAssignmentQueryFilter) => {
   const whereConditions: Prisma.AssignmentWhereInput =
     andConditions.length > 0 ? { AND: andConditions } : {};
 
+  // Fetch assignments
   const result = await prisma.assignment.findMany({
     where: whereConditions,
     select: {
@@ -83,6 +98,7 @@ const getAllAssignments = async (options: TAssignmentQueryFilter) => {
       deadline: true,
       instructorId: true,
       isAvailable: true,
+      isDeleted: true,
       createdAt: true,
     },
     skip,
@@ -91,6 +107,7 @@ const getAllAssignments = async (options: TAssignmentQueryFilter) => {
       sortBy && sortOrder ? { [sortBy]: sortOrder } : { createdAt: "desc" },
   });
 
+  // Total count
   const total = await prisma.assignment.count({
     where: whereConditions,
   });
@@ -179,6 +196,7 @@ const deleteAssignment = async (id: string) => {
 export const assignmentServices = {
   createAssignment,
   getAllAssignments,
+  getInstructorAssignments,
   getAssignmentById,
   updateAssignment,
   deleteAssignment,

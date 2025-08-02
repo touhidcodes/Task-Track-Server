@@ -48,6 +48,7 @@ const loginUser = catchAsync(async (req, res) => {
       id: result.userData.id,
       username: result.userData.username,
       email: result.userData.email,
+      role: result.userData.role,
       token: result.accessToken,
     },
   });

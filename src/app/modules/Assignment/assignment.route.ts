@@ -10,16 +10,23 @@ const router = express.Router();
 // Create assignment (Instructors only)
 router.post(
   "/",
-  // auth(UserRole.INSTRUCTOR),
+  auth(UserRole.INSTRUCTOR),
   validateRequest(assignmentValidationSchema.createAssignmentSchema),
   assignmentControllers.createAssignment
 );
 
 // Get all assignments (Instructor & Student)
 router.get(
-  "/",
+  "/all",
   auth(UserRole.INSTRUCTOR, UserRole.STUDENT),
   assignmentControllers.getAllAssignments
+);
+
+// Get all assignments (Instructor & Student)
+router.get(
+  "/instructor",
+  auth(UserRole.INSTRUCTOR),
+  assignmentControllers.getInstructorAssignments
 );
 
 // Get single assignment by id (Instructor & Student)

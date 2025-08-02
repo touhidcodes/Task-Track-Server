@@ -9,7 +9,7 @@ import prisma from "../utils/prisma";
 
 const auth = (...roles: string[]) => {
   return catchAsync(async (req, res, next: NextFunction) => {
-    const token = req.headers.authorization?.split(" ")[1]; // Handle Bearer token format
+    const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
       throw new APIError(httpStatus.UNAUTHORIZED, "Unauthorized Access!");
@@ -23,7 +23,7 @@ const auth = (...roles: string[]) => {
 
     // Check user existence
     const user = await prisma.user.findUnique({
-      where: { id: decodedUser.userId }, // id is enough since it's unique
+      where: { id: decodedUser.userId },
     });
 
     if (!user) {

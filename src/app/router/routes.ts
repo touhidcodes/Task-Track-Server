@@ -20,7 +20,7 @@ const moduleRoutes = [
     route: assignmentRoutes,
   },
   {
-    path: "/submission",
+    path: "/submissions",
     route: submissionRoutes,
   },
 ];

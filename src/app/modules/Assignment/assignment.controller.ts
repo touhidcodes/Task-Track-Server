@@ -25,13 +25,29 @@ const createAssignment = catchAsync(async (req, res) => {
 
 // Get all assignments (for instructors and students)
 const getAllAssignments = catchAsync(async (req, res) => {
+  const result = await assignmentServices.getAllAssignments();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "All assignments retrieved successfully!",
+    data: result,
+  });
+});
+
+// Get all assignments (for instructors and students)
+const getInstructorAssignments = catchAsync(async (req, res) => {
+  const { userId } = req.user;
   const options = queryFilters(
     req.query,
     assignmentFilterableFields,
     assignmentPaginationFields
   );
 
-  const result = await assignmentServices.getAllAssignments(options);
+  const result = await assignmentServices.getInstructorAssignments(
+    userId,
+    options
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -87,6 +103,7 @@ const deleteAssignment = catchAsync(async (req, res) => {
 export const assignmentControllers = {
   createAssignment,
   getAllAssignments,
+  getInstructorAssignments,
   getAssignmentById,
   updateAssignment,
   deleteAssignment,

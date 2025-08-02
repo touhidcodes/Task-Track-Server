@@ -10,9 +10,16 @@ const router = express.Router();
 // Create submission (Student)
 router.post(
   "/",
-  auth(UserRole.STUDENT),
-  validateRequest(submissionValidationSchema.createSubmissionValidation),
+  //   auth(UserRole.STUDENT),
+  //   validateRequest(submissionValidationSchema.createSubmissionValidation),
   submissionControllers.createSubmission
+);
+
+// Get submission count by instructor
+router.get(
+  "/status",
+  auth(UserRole.INSTRUCTOR),
+  submissionControllers.getSubmissionStatusCounts
 );
 
 // Get all submissions (Instructor/Admin/Student filtered)
