@@ -12,7 +12,7 @@ import queryFilters from "../../utils/queryFilters";
 const createSubmission = catchAsync(async (req, res) => {
   const submissionData = req.body;
   submissionData.studentId = req.user.userId;
-  console.log(req.body);
+
   const result = await submissionServices.createSubmission(submissionData);
 
   sendResponse(res, {
@@ -45,6 +45,19 @@ const getAllSubmissions = catchAsync(async (req, res) => {
 const getSubmissionById = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await submissionServices.getSubmissionById(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Submission retrieved successfully!",
+    data: result,
+  });
+});
+
+// Get student submission
+const getStudentSubmission = catchAsync(async (req, res) => {
+  const { userId } = req.user;
+  const result = await submissionServices.getStudentSubmissions(userId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -95,11 +108,28 @@ export const getSubmissionStatusCounts = catchAsync(async (req, res) => {
   });
 });
 
+// Get status counts
+export const getStudentSubmissionStatusCounts = catchAsync(async (req, res) => {
+  const { userId } = req.user;
+  const result = await submissionServices.getStudentSubmissionStatusCounts(
+    userId
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Submission status counts retrieved successfully!",
+    data: result,
+  });
+});
+
 export const submissionControllers = {
   createSubmission,
   getAllSubmissions,
   getSubmissionById,
+  getStudentSubmission,
   updateSubmission,
   deleteSubmission,
   getSubmissionStatusCounts,
+  getStudentSubmissionStatusCounts,
 };

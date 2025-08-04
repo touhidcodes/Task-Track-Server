@@ -12,7 +12,7 @@ const updateSubmissionValidation = z.object({
   body: z.object({
     submissionUrl: z.string().optional(),
     note: z.string().optional(),
-    status: z.enum(["PENDING", "APPROVED", "REJECTED"]).optional(),
+    status: z.enum(["PENDING", "ACCEPTED", "REJECTED"]).optional(),
     feedback: z.string().optional(),
   }),
 });

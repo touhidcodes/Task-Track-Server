@@ -1,4 +1,4 @@
-import { Prisma, Submission } from "@prisma/client";
+import { Prisma, Status, Submission } from "@prisma/client";
 import prisma from "../../utils/prisma";
 import APIError from "../../errors/APIError";
 import httpStatus from "http-status";
@@ -7,7 +7,6 @@ import { TSubmissionQueryFilter } from "./submission.interface";
 
 // Create new submission
 const createSubmission = async (data: Submission) => {
-  // Check assignment deadline before submission
   const assignment = await prisma.assignment.findUniqueOrThrow({
     where: { id: data.assignmentId },
     select: { deadline: true },
@@ -160,20 +159,58 @@ const getSubmissionById = async (id: string) => {
   return result;
 };
 
+// Get all submissions for the student
+const getStudentSubmissions = async (studentId: string) => {
+  const submissions = await prisma.submission.findMany({
+    where: {
+      studentId,
+    },
+    include: {
+      assignment: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return submissions;
+};
+
 // Update submission (student resubmit / instructor feedback)
 const updateSubmission = async (id: string, data: Partial<Submission>) => {
+  // First check if the submission exists
   const existingSubmission = await prisma.submission.findUniqueOrThrow({
     where: { id },
   });
 
+  // Prepare the update data with proper enum handling
+  const updateData: Partial<Submission> = { ...data };
+
+  // Convert string status to enum if provided
+  if (data.status) {
+    // If status is a string, convert it to proper enum
+    if (typeof data.status === "string") {
+      const statusValue = data.status.toUpperCase();
+
+      // Validate that the status exists in the enum
+      if (Object.values(Status).includes(statusValue as Status)) {
+        updateData.status = statusValue as Status;
+      } else {
+        throw new Error(
+          `Invalid status value: ${
+            data.status
+          }. Valid values are: ${Object.values(Status).join(", ")}`
+        );
+      }
+    } else {
+      // If it's already an enum, use it directly
+      updateData.status = data.status;
+    }
+  }
+
   const result = await prisma.submission.update({
     where: { id },
-    data: {
-      submissionUrl: data.submissionUrl ?? existingSubmission.submissionUrl,
-      note: data.note ?? existingSubmission.note,
-      status: data.status ?? existingSubmission.status,
-      feedback: data.feedback ?? existingSubmission.feedback,
-    },
+    data: updateData,
     select: {
       id: true,
       submissionUrl: true,
@@ -186,7 +223,6 @@ const updateSubmission = async (id: string, data: Partial<Submission>) => {
 
   return result;
 };
-
 // Delete submission
 const deleteSubmission = async (id: string) => {
   const existingSubmission = await prisma.submission.findUnique({
@@ -227,11 +263,39 @@ const getSubmissionStatusCounts = async () => {
   return result;
 };
 
+const getStudentSubmissionStatusCounts = async (studentId: string) => {
+  const counts = await prisma.submission.groupBy({
+    by: ["status"],
+    _count: { status: true },
+    where: {
+      studentId,
+    },
+  });
+
+  const result = {
+    pending: 0,
+    accepted: 0,
+    rejected: 0,
+  };
+
+  counts.forEach((item) => {
+    if (item.status === "PENDING") result.pending = item._count.status;
+    if (item.status === "ACCEPTED") result.accepted = item._count.status;
+    if (item.status === "REJECTED") result.rejected = item._count.status;
+  });
+
+  return result;
+};
+
+export default getStudentSubmissionStatusCounts;
+
 export const submissionServices = {
   createSubmission,
   getAllSubmissions,
   getSubmissionById,
+  getStudentSubmissions,
   updateSubmission,
   deleteSubmission,
   getSubmissionStatusCounts,
+  getStudentSubmissionStatusCounts,
 };

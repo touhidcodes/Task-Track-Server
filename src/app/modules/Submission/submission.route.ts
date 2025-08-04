@@ -9,9 +9,9 @@ const router = express.Router();
 
 // Create submission (Student)
 router.post(
-  "/",
+  "/create",
   auth(UserRole.STUDENT),
-  validateRequest(submissionValidationSchema.createSubmissionValidation),
+  //   validateRequest(submissionValidationSchema.createSubmissionValidation),
   submissionControllers.createSubmission
 );
 
@@ -22,8 +22,26 @@ router.get(
   submissionControllers.getSubmissionStatusCounts
 );
 
+// Get submission count by student
+router.get(
+  "/status-student",
+  auth(UserRole.STUDENT),
+  submissionControllers.getStudentSubmissionStatusCounts
+);
+
+// Get single submission
+router.get(
+  "/student",
+  auth(UserRole.STUDENT),
+  submissionControllers.getStudentSubmission
+);
+
 // Get all submissions (Instructor/Admin/Student filtered)
-router.get("/", submissionControllers.getAllSubmissions);
+router.get(
+  "/",
+  auth(UserRole.INSTRUCTOR),
+  submissionControllers.getAllSubmissions
+);
 
 // Get single submission
 router.get("/:id", submissionControllers.getSubmissionById);
